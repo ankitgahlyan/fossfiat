@@ -37,34 +37,34 @@
 import './App.css';
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { useTonConnect } from './hooks/useTonConnect';
-import { useCounterContract } from './hooks/useCounterContract';
+import { useWalletContract } from './hooks/useWalletContract';
 
 function App() {
   const { connected } = useTonConnect();
-  const { value, address, sendIncrement } = useCounterContract();
+  const { value, address, sendTransfer } = useWalletContract();
 
   return (
     <div className='App'>
       <div className='Container'>
-        <TonConnectButton />
+        <TonConnectButton className= 'Button' style={{ float: 'right' }}/>
 
         <div className='Card'>
-          <b>Counter Address</b>
+          <b>Wallet Address</b>
           <div className='Hint'>{address?.slice(0, 30) + '...'}</div>
         </div>
 
         <div className='Card'>
-          <b>Counter Value</b>
+          <b>Wallet Full State</b>
           <div>{value ?? 'Loading...'}</div>
         </div>
 
         <a
           className={`Button ${connected ? 'Active' : 'Disabled'}`}
           onClick={() => {
-            sendIncrement();
+            sendTransfer();
           }}
         >
-          Increment
+          SendCustomAction
         </a>
       </div>
     </div>
