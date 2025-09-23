@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "MyTonWallet · My TON Wallet",
   "description": "The most feature-rich TON+TRON wallet: multi-accounts, multi-send, Telegram Gifts and other collectibles, TON DNS+Proxy, and more.",
-  "version": "4.1.3",
+  "version": "4.1.6",
   "icons": {
     "192": "icon-192x192.png",
     "384": "icon-384x384.png",
