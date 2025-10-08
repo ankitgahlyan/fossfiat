@@ -36,19 +36,19 @@ import { JettonTransfer, JettonWalletSharded } from '../output/Shard_JettonWalle
 import { useTonClient } from './useTonClient';
 import { useAsyncInitialize } from './useAsyncInitialize';
 import { useTonConnect } from './useTonConnect';
-import { Address, beginCell, Cell, Dictionary, OpenedContract } from '@ton/core';
+import { Address, beginCell, OpenedContract } from '@ton/core';
 import { ExtendedShardedJettonWallet } from '../contracts/ExtendedShardedJettonWallet';
 
 // Define dictionary schema
-const balancesDict = Dictionary.loadDirect(
-  Dictionary.Keys.Address(),
-  Dictionary.Values.Int(64),   // or 257 depending on your Int size
-  cellFromGetter // result from getAllBalances
-);
-// Iterate
-for (const [addr, balance] of balancesDict) {
-  console.log(addr.toString(), balance.toString());
-}
+// const balancesDict = Dictionary.loadDirect(
+//   Dictionary.Keys.Address(),
+//   Dictionary.Values.Int(64),   // or 257 depending on your Int size
+//   cellFromGetter // result from getAllBalances
+// );
+// // Iterate
+// for (const [addr, balance] of balancesDict) {
+//   console.log(addr.toString(), balance.toString());
+// }
 
 // reports: Dictionary {
 //     _key: {

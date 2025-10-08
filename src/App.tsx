@@ -1,47 +1,16 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-// import './App.css'
-
-// function App() {
-//   const [count, setCount] = useState(0)
-
-//   return (
-//     <>
-//       <div>
-//         <a href="https://vite.dev" target="_blank">
-//           <img src={viteLogo} className="logo" alt="Vite logo" />
-//         </a>
-//         <a href="https://react.dev" target="_blank">
-//           <img src={reactLogo} className="logo react" alt="React logo" />
-//         </a>
-//       </div>
-//       <h1>Vite + React</h1>
-//       <div className="card">
-//         <button onClick={() => setCount((count) => count + 1)}>
-//           count is {count}
-//         </button>
-//         <p>
-//           Edit <code>src/App.tsx</code> and save to test HMR
-//         </p>
-//       </div>
-//       <p className="read-the-docs">
-//         Click on the Vite and React logos to learn more
-//       </p>
-//     </>
-//   )
-// }
-
-// // export default App
 //import '@twa-dev/sdk'
 import './App.css';
-import { TonConnectButton } from '@tonconnect/ui-react';
+import {
+  TonConnectButton,
+  useTonConnectUI,
+  useTonWallet
+} from '@tonconnect/ui-react';
 import { useTonConnect } from './hooks/useTonConnect';
 import { useWalletContract } from './hooks/useWalletContract';
 
-function App() {
+export function AppOld() {
   const { connected } = useTonConnect();
-  const { value, address, sendTransfer } = useWalletContract();
+  const { address, sendTransfer } = useWalletContract();
 
   return (
     <div className='App'>
@@ -55,7 +24,7 @@ function App() {
 
         <div className='Card'>
           <b>Wallet Full State</b>
-          <div>{value ?? 'Loading...'}</div>
+          {/* <div>{value ?? 'Loading...'}</div> */}
         </div>
 
         <a
@@ -71,4 +40,36 @@ function App() {
   );
 }
 
-export default App
+// export default App
+
+function WalletActions() {
+  const [tonConnectUI] = useTonConnectUI();
+  const wallet = useTonWallet();
+
+  const sendOneTon = async () => {
+    if (!wallet) return;
+
+    await tonConnectUI.sendTransaction({
+      validUntil: Math.floor(Date.now() / 1000) + 120,
+      messages: [
+        {
+          address: wallet.account.address,
+          amount: '1000000000'
+        }
+      ]
+    });
+  };
+
+  return (
+    <>
+      <TonConnectButton />
+      <button onClick={sendOneTon}>Send 1 TON</button>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+      <WalletActions />
+  );
+}
