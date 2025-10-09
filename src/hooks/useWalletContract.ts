@@ -32,33 +32,15 @@
 //   };
 // }
 import { useEffect, useState } from 'react';
-import { JettonTransfer, JettonWalletSharded } from '../output/Shard_JettonWalletSharded';
 import { useTonClient } from './useTonClient';
 import { useAsyncInitialize } from './useAsyncInitialize';
 import { useTonConnect } from './useTonConnect';
 import { Address, beginCell, OpenedContract } from '@ton/core';
-import { ExtendedShardedJettonWallet } from '../contracts/ExtendedShardedJettonWallet';
-
-// Define dictionary schema
-// const balancesDict = Dictionary.loadDirect(
-//   Dictionary.Keys.Address(),
-//   Dictionary.Values.Int(64),   // or 257 depending on your Int size
-//   cellFromGetter // result from getAllBalances
-// );
-// // Iterate
-// for (const [addr, balance] of balancesDict) {
-//   console.log(addr.toString(), balance.toString());
-// }
-
-// reports: Dictionary {
-//     _key: {
-//       bits: 267,
-//       serialize: [Function: serialize],
-//       parse: [Function: parse]
-//     },
-//     _value: { serialize: [Function: serialize], parse: [Function: parse] },
-//     _map: Map(0) {}
-//   },
+// import { ExtendedShardedJettonWallet } from '../contracts/ExtendedShardedJettonWallet';
+// import { ExtendedShardedJettonMinter } from '../contracts/ExtendedShardedJettonMinter';
+import { JettonMinterSharded } from '../output/Root_JettonMinterSharded';
+import { JettonTransfer, JettonWalletSharded } from '../output/Root_JettonWalletSharded';
+import { useTonAddress } from '@tonconnect/ui-react';
 
 export function useWalletContract() {
   const client = useTonClient();
@@ -77,10 +59,22 @@ export function useWalletContract() {
     forwardPayload: beginCell().storeUint(0, 1).endCell().beginParse(),
   }
 
+  const minterContract = useAsyncInitialize(async () => {
+    if (!client) return;
+    const contract = new JettonMinterSharded(
+      Address.parse('EQCFhF5i6Tsvxm9ncx0t7iQoQ7AW6dHdUpF20nKmws3KNM2K')
+    );
+    return client.open(contract) as OpenedContract<JettonMinterSharded>;
+  }, [client]);
+
+  const ownerAddress = useTonAddress()
+  const jettonWalletAddress = minterContract?.getGetWalletAddress(Address.parse(ownerAddress))
+
   const walletContract = useAsyncInitialize(async () => {
     if (!client) return;
-    const contract = new ExtendedShardedJettonWallet(
-      Address.parse('kQB8mhFykq_xOMSBX3y8W9w2_zp6lEJ5iJ76u-y1J3AMK70v') // replace with your address from tutorial 2 step 8
+    const contract = new JettonWalletSharded(
+      // Address.parse('jettonWalletAddress') // replace with your address from tutorial 2 step 8
+      jettonWalletAddress
     );
     return client.open(contract) as OpenedContract<JettonWalletSharded>;
   }, [client]);

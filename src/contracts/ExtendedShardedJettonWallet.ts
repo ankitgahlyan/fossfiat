@@ -7,10 +7,10 @@ import {
     JettonWalletSharded,
     walletStateInitBits,
     walletStateInitCells,
-} from "../output/Shard_JettonWalletSharded"
+} from "../output/Root_JettonWalletSharded"
 
 import {Address, Builder, Cell, ContractProvider, Sender, toNano} from "@ton/core"
-import {JettonBurn, ProvideWalletBalance} from "../output/Shard_JettonMinterSharded"
+import {JettonBurn, ProvideWalletBalance} from "../output/Root_JettonMinterSharded"
 
 export class ExtendedShardedJettonWallet extends JettonWalletSharded {
     constructor(address: Address, init?: {code: Cell; data: Cell}) {
@@ -142,7 +142,7 @@ export class ExtendedShardedJettonWallet extends JettonWalletSharded {
         return this.send(provider, via, {value: value}, msg)
     }
 
-    // // for compatibility with the reference implementation tests
+    // for compatibility with the reference implementation tests
     // sendWithdrawTons = async (_provider: ContractProvider, _via: Sender): Promise<void> => {
     //     throw new Error("Not implemented")
     // }

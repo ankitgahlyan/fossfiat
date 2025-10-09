@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ton-community/assets-sdk": "0.0.5",
     "@orbs-network/ton-access": "^2.3.3",
     "@ton/core": "^0.61.0",
     "@ton/crypto": "^3.3.0",
@@ -22,6 +23,11 @@
     "vite-plugin-node-polyfills": "^0.24.0"
   },
   "devDependencies": {
+    "autoprefixer": "^10.4.16",
+    "dotenv": "^17.2.3",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "@aws-crypto/sha256-js": "^5.2.0",
     "@eslint/js": "^9.33.0",
     "@types/node": "^24.3.1",
     "@types/react": "^19.1.10",
