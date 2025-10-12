@@ -1,3 +1,5 @@
+import { config } from './config/consts'
+import './index.css'
 import { StrictMode } from 'react'
 // import { createRoot } from 'react-dom/client'
 import ReactDOM from 'react-dom/client';
@@ -7,12 +9,11 @@ import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import WebApp from '@twa-dev/sdk';
 
 WebApp.ready();
-const manifestUrl = 'https://ankitgahlyan.github.io/fossfiat/tonconnect-manifest.json';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>
     <TonConnectUIProvider
-      manifestUrl={manifestUrl}
+      manifestUrl={config.MANIFEST_URL}
       //uiPreferences={{ theme: THEME.DARK }}
       actionsConfiguration={{
         twaReturnUrl: 'https://t.me/fossfiatbot/myapp'
@@ -31,7 +32,8 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         ]
       }}
     >
-      <App />
+      <App/>
     </TonConnectUIProvider>,
   </StrictMode>
 )
+

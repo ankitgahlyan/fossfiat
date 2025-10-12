@@ -1,38 +1,25 @@
 //import '@twa-dev/sdk'
-import { TonConnectButton, TonConnectUI, useTonConnectUI, useTonWallet, } from '@tonconnect/ui-react';
+import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
 import { useTonConnect } from './hooks/useTonConnect';
-// import { useWalletContract } from './hooks/useWalletContract';
-import { createApi, } from "@ton-community/assets-sdk";
-
 import "buffer";
-import {
-  Address,
-  beginCell,
-  Sender,
-  SenderArguments,
-  storeStateInit,
-  toNano,
-  TonClient,
-} from "@ton/ton";
-import { ExtendedShardedJettonMinter } from './contracts/ExtendedShardedJettonMinter';
-import { ExtendedShardedJettonWallet } from './contracts/ExtendedShardedJettonWallet';
-import { JettonTransfer } from './output/Root_JettonMinterSharded';
+import { Address, beginCell, toNano, TonClient } from "@ton/ton";
+import { JettonMinterSharded, JettonTransfer } from './output/Root_JettonMinterSharded';
 import React from 'react';
-import { getHttpEndpoint } from '@orbs-network/ton-access';
-import { getNetworkFromEnv } from './utils/utils';
+import { JettonWalletSharded } from './output/Root_JettonWalletSharded';
+import "dotenv/config"
+import { config } from './config/consts';
+import { Button } from './components/ui/button';
+// import { ExtendedShardedJettonWallet } from './contracts/ExtendedShardedJettonWallet';
+import { TransferForm } from './components/TransferForm';
 
 function App() {
-  const { connected } = useTonConnect();
   const [tonConnectUI] = useTonConnectUI();
-  const wallet = useTonWallet();
-
+  const { connected, wallet, sender } = useTonConnect();
   // React.useEffect(() => {
   //   if (!wallet) {
-  //     // open modal only when needed
   //     tonConnectUI.openModal();
   //   }
   // }, [wallet, tonConnectUI]);
-
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -44,13 +31,15 @@ function App() {
   const [bgGradient, setBgGradient] = React.useState<string>("");
   React.useEffect(() => {
     const gradients = [
-      "linear-gradient(135deg, #0f172a 0%, #061220 100%)",
-      "linear-gradient(135deg, #071025 0%, #003049 100%)",
-      "linear-gradient(135deg, #071120 0%, #0b1221 100%)",
-      "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-      "linear-gradient(135deg, #0b1221 0%, #3b82f6 100%)",
-      "linear-gradient(135deg, #0f172a 0%, #7c3aed 100%)",
-      "linear-gradient(135deg, #041624 0%, #0f172a 100%)"
+      // Subtle dark base with low-opacity color accents across the spectrum
+      "linear-gradient(135deg, rgba(6,12,20,0.96) 0%, rgba(255,69,58,0.12) 100%)",   // red
+      "linear-gradient(135deg, rgba(6,12,20,0.96) 0%, rgba(255,159,67,0.12) 100%)",  // orange
+      "linear-gradient(135deg, rgba(6,12,20,0.96) 0%, rgba(253,224,71,0.10) 100%)",  // yellow
+      "linear-gradient(135deg, rgba(6,12,20,0.96) 0%, rgba(72,187,120,0.12) 100%)",  // green
+      "linear-gradient(135deg, rgba(6,12,20,0.96) 0%, rgba(45,206,215,0.10) 100%)",  // cyan/teal
+      "linear-gradient(135deg, rgba(6,12,20,0.96) 0%, rgba(99,102,241,0.12) 100%)",  // indigo/blue
+      "linear-gradient(135deg, rgba(6,12,20,0.96) 0%, rgba(168,85,247,0.12) 100%)", // purple
+      "linear-gradient(135deg, rgba(6,12,20,0.96) 0%, rgba(255,102,204,0.10) 100%)" // magenta/pink
     ];
 
     const randIndex = (() => {
@@ -67,115 +56,139 @@ function App() {
     setBgGradient(gradients[randIndex]);
   }, []);
 
-  class TonConnectProvider implements Sender {
-    /**
-     * The TonConnect UI instance.
-     * @private
-     */
-    private readonly provider: TonConnectUI;
+  // class TonConnectProvider implements Sender {
+  //   /**
+  //    * The TonConnect UI instance.
+  //    * @private
+  //    */
+  //   private readonly provider: TonConnectUI;
 
-    /**
-     * The address of the current account.
-     */
-    public get address(): Address | undefined {
-      const address = this.provider.account?.address;
-      return address ? Address.parse(address) : undefined;
-    }
+  //   /**
+  //    * The address of the current account.
+  //    */
+  //   public get address(): Address {
+  //     const address = this.provider.account?.address;
+  //     // return address ? Address.parse(address) : undefined;
+  //     return Address.parse(address!);
+  //   }
 
-    /**
-     * Creates a new TonConnectProvider.
-     * @param provider
-     */
-    public constructor(provider: TonConnectUI) {
-      this.provider = provider;
-    }
+  //   /**
+  //    * Creates a new TonConnectProvider.
+  //    * @param provider
+  //    */
+  //   public constructor(provider: TonConnectUI) {
+  //     this.provider = provider;
+  //   }
 
-    /**
-     * Sends a message using the TonConnect UI.
-     * @param args
-     */
-    public async send(args: SenderArguments): Promise<void> {
-      // The transaction is valid for 10 minutes.
-      const validUntil = Math.floor(Date.now() / 1000) + 600;
+  //   /**
+  //    * Sends a message using the TonConnect UI.
+  //    * @param args
+  //    */
+  //   public async send(args: SenderArguments): Promise<void> {
+  //     // The transaction is valid for 10 minutes.
+  //     const validUntil = Math.floor(Date.now() / 1000) + 600;
 
-      // The recipient's address should be in bounceable format for all smart contracts.
-      const address = args.to.toString({ urlSafe: true, bounceable: true });
+  //     // The recipient's address should be in bounceable format for all smart contracts.
+  //     const address = args.to.toString({ urlSafe: true, bounceable: true });
 
-      // The address of the sender, if available.
-      // const from = this.address?.toRawString();
+  //     // The address of the sender, if available.
+  //     // const from = this.address?.toRawString();
 
-      // The amount to send in nano tokens.
-      const amount = args.value.toString();
+  //     // The amount to send in nano tokens.
+  //     const amount = args.value.toString();
 
-      // The state init cell for the contract.
-      let stateInit: string | undefined;
-      if (args.init) {
-        // State init cell for the contract.
-        const stateInitCell = beginCell()
-          .store(storeStateInit(args.init))
-          .endCell();
-        // Convert the state init cell to boc base64.
-        stateInit = stateInitCell.toBoc().toString("base64");
-      }
+  //     // The state init cell for the contract.
+  //     let stateInit: string | undefined;
+  //     if (args.init) {
+  //       // State init cell for the contract.
+  //       const stateInitCell = beginCell()
+  //         .store(storeStateInit(args.init))
+  //         .endCell();
+  //       // Convert the state init cell to boc base64.
+  //       stateInit = stateInitCell.toBoc().toString("base64");
+  //     }
 
-      // The payload for the message.
-      let payload: string | undefined;
-      if (args.body) {
-        // Convert the message body to boc base64.
-        payload = args.body.toBoc().toString("base64");
-      }
+  //     // The payload for the message.
+  //     let payload: string | undefined;
+  //     if (args.body) {
+  //       // Convert the message body to boc base64.
+  //       payload = args.body.toBoc().toString("base64");
+  //     }
 
-      // Use the TonConnect UI to send the message and wait for the sending
-      await this.provider.sendTransaction({
-        validUntil,
-        messages: [
-          { address, amount, stateInit, payload },
-        ],
-      });
-    }
-  }
+  //     // Use the TonConnect UI to send the message and wait for the sending
+  //     await this.provider.sendTransaction({
+  //       validUntil,
+  //       messages: [
+  //         { address, amount, stateInit, payload },
+  //       ],
+  //     });
+  //   }
+  // }
 
-  const CONTRACT_ADDRESS = "EQBNvGxBDpm8FbP8BhtgQdZ9qoQlUghTPM2fHgGDy1kPJpTN";
+  const client = new TonClient({ endpoint: "https://testnet.toncenter.com/api/v2/jsonRPC", apiKey: process.env.TONCENTER_TESTNET_KEY }); // NOTE: how's this safe in static site
+  // const sender = new TonConnectProvider(tonConnectUI);
+  const userAddress = sender.address;
+  const minterAddress = Address.parse(config.MINTER_ADDRESS);
+  const minter = client.open(JettonMinterSharded.fromAddress(minterAddress));
+  // const contract = ExtendedShardedJettonWallet.fromInit(userAddress!, minterAddress, 0n);
+  // const jettonAddress = contractAddress();
 
-  const getRootInstance = async () => {
-    // const client = new TonClient({endpoint: "https://testnet.toncenter.com/api/v2/jsonRPC",});
-    const address = Address.parse(CONTRACT_ADDRESS);
+  // const getRootInstance = async () => {
+  //   // return client.open(ExtendedShardedJettonMinter.fromAddress(rootAddress));
+  //   // return client.open(JettonMinterSharded.fromAddress(minterAddress));
 
-    const network = getNetworkFromEnv()
-    const endpoint = await getHttpEndpoint({ network })
-    const client = new TonClient({ endpoint: endpoint })
-    const minter = client.open(ExtendedShardedJettonMinter.fromAddress(address))
-    const minterData = await minter.getGetJettonData()
-    console.log(minterData)
+  //   // const network = getNetworkFromEnv()
+  //   // const endpoint = await getHttpEndpoint({ network })
+  //   // const client = new TonClient({ endpoint: endpoint })
 
-    return client.open(ExtendedShardedJettonMinter.fromAddress(address));
-  };
+  //   // const jettonAddress = await minter.getGetWalletAddress(userAddress);
+  //   // const jetton = client.open(JettonWalletSharded.fromAddress(jettonAddress));
+  //   // const jettonContract = await JettonWalletSharded.fromInit(userAddress, minterAddress, 0n);
+  //   // const jetton = client.open(jettonContract);
+  //   //======================================================================================
+  //   const jetton = client.open(await JettonWalletSharded.fromInit(userAddress, minterAddress, 0n));
+  //   const walletAllData = await jetton.getState();
+  //   console.log(walletAllData.balance)
 
-  const getWalletInstance = async () => {
-    if (!wallet) throw new Error("Wallet not connected");
+  //   // =============================================================================
+  //   // const api = await createApi("testnet");
+  //   // const provider = new TonConnectUI(); // OR you can use tonConnectUI as a provider from @tonconnect/ui-react
+
+  //   // // https://github.com/ton-community/assets-sdk/blob/main/examples/use-tonconnect.ts
+  //   // const sender = new TonConnectSender(provider);
+  //   // // const sender = new TonConnectSender(provider);
+
+  //   // const storage: PinataStorageParams = {
+  //   //   pinataApiKey: process.env.PINATA_API_KEY!,
+  //   //   pinataSecretKey: process.env.PINATA_SECRET!,
+  //   // };
+
+  //   // const sdk = AssetsSDK.create({
+  //   //   api,
+  //   //   storage,
+  //   //   sender,
+  //   // });
+
+  //   // const jetton = sdk.openJettonWallet(address);
+  //   // const RECEIVER_ADDRESS = Address.parse("RECEIVER_ADDRESS");
+
+  //   // jetton.send(sender, RECEIVER_ADDRESS, toNano(10));
+  // };
+
+  const jetton = async () => {
+    // if (!wallet) setError("connect wallet and retry");//throw new Error("Wallet not connected");
     // you can use createApi from @ton-community/assets-sdk
-    const client = await createApi("testnet");
-    const address = Address.parse(wallet.account.address);
-    return client.open(ExtendedShardedJettonWallet.fromAddress(address));
-  };
-
-  const getRootState = async () => {
-    try {
-      const rootInstance = await getRootInstance();
-      const state = await rootInstance.getGetJettonData()
-      console.log("root state", state);
-    } catch (e) {
-      // silent failure for minimal UI; surface if needed
-      setError(e instanceof Error ? e.message : String(e));
-    }
+    // const client = await createApi("testnet");
+    return client.open(await JettonWalletSharded.fromInit(userAddress!, minterAddress, 0n));
   };
 
   const sendTransfer = async (to: Address, amount: bigint) => {
     try {
       setIsLoading(true);
       setError(null);
-      const walletInstance = await getWalletInstance();
-      const sender = new TonConnectProvider(tonConnectUI);
+      const walletInstance = await jetton();
+      // const sender = new TonConnectProvider(tonConnectUI);
+
 
       const msg: JettonTransfer = {
         $$type: "JettonTransfer",
@@ -197,26 +210,24 @@ function App() {
     }
   };
 
-  const getState = async () => {
-    try {
-      setError(null);
-      if (wallet) {
-        // When wallet is connected, query wallet contract state
-        const walletInstance = await getWalletInstance();
-        const walletState = await walletInstance.getState();
-        console.log("wallet state", walletState);
-      } else {
-        // No wallet: fallback to querying the root contract state
-        const rootInstance = await getRootInstance();
-        const rootState = await rootInstance.getState();
-        console.log("root state (no wallet)", rootState);
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    }
+  const getRootState = async () => {
+    const state = await minter.getGetJettonData()
+    console.log("root state", state.totalSupply);
+    return state.totalSupply
   };
 
-  // Minimal, dark, static gradient, no animations, mobile-first
+  const getState = async () => {
+    if (!connected || !wallet) {
+      tonConnectUI.openSingleWalletModal('tonkeeper');
+      setError("Wallet not connected");
+      return;
+    }
+    const walletInstance = await jetton();
+    const walletState = await walletInstance.getOtherConsts;
+    console.log("wallet state", walletState);
+
+  };
+
   return (
     <main
       style={{ background: bgGradient || "linear-gradient(135deg, #0f172a 0%, #061220 100%)" }}
@@ -226,7 +237,7 @@ function App() {
         <header className="flex items-center justify-between mb-6">
           <h1 className="text-lg font-semibold">FossFiat</h1>
           <div className="shrink-0">
-            <TonConnectButton />
+            <TonConnectButton style={{ float: "right" }} />
           </div>
         </header>
 
@@ -240,7 +251,7 @@ function App() {
             name="destination"
             value={dest}
             onChange={(e) => setDest(e.target.value)}
-            placeholder="EQ..."
+            placeholder="enter receiver's account: 0Q..."
             className="w-full text-sm p-2 bg-neutral-900 border border-neutral-700 rounded-md focus:outline-none"
             inputMode="text"
             aria-label="destination address"
@@ -291,7 +302,7 @@ function App() {
               onClick={getState}
               className="w-28 text-sm p-2 rounded-md bg-neutral-800 border border-neutral-700 text-neutral-200"
             >
-              Get State
+              getAccountState
             </button>
 
             <button
@@ -301,9 +312,16 @@ function App() {
             >
               Get Root State
             </button>
+
+            <div className="flex min-h-svh flex-row items-center justify-center">
+              <Button onClick={() => tonConnectUI.openSingleWalletModal('mytonwallet')}>
+                connectMyTonWallet
+              </Button>
+            </div>
           </div>
         </section>
 
+        <TransferForm/>
         <footer className="mt-6 text-center text-xs text-neutral-400">
           • akki •
         </footer>

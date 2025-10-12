@@ -41,6 +41,7 @@ import { Address, beginCell, OpenedContract } from '@ton/core';
 import { JettonMinterSharded } from '../output/Root_JettonMinterSharded';
 import { JettonTransfer, JettonWalletSharded } from '../output/Root_JettonWalletSharded';
 import { useTonAddress } from '@tonconnect/ui-react';
+import { config } from '@/config/consts';
 
 export function useWalletContract() {
   const client = useTonClient();
@@ -62,7 +63,7 @@ export function useWalletContract() {
   const minterContract = useAsyncInitialize(async () => {
     if (!client) return;
     const contract = new JettonMinterSharded(
-      Address.parse('EQCFhF5i6Tsvxm9ncx0t7iQoQ7AW6dHdUpF20nKmws3KNM2K')
+      Address.parse(config.MINTER_ADDRESS)
     );
     return client.open(contract) as OpenedContract<JettonMinterSharded>;
   }, [client]);
