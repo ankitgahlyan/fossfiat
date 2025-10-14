@@ -15,7 +15,7 @@
     "allowImportingTsExtensions": true,
     //"verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "emitDeclarationOnly": true,
+    "noEmit": true,
     "composite": true,
     "jsx": "react-jsx",
     /* Linting */
@@ -33,6 +33,13 @@
     }
   },
   "include": [
-    "src"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "src/utils/**",
+    "src/components/TransferForm.tsx",
+    "src/service-worker.ts"
   ]
 }

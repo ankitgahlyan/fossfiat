@@ -1,95 +1,58 @@
-//import '@twa-dev/sdk'
 import {TonConnectButton, TonConnectUI, useTonConnectUI, useTonWallet} from '@tonconnect/ui-react';
-// import {useTonConnect} from './hooks/useTonConnect';
 import "buffer";
-import {Address, beginCell, toNano, Sender, SenderArguments, storeStateInit, TonClient} from "@ton/ton";
+import {
+    Address,
+    beginCell,
+    toNano,
+    Sender,
+    SenderArguments,
+    storeStateInit,
+    TonClient
+} from "@ton/ton";
 import {JettonMinterSharded, JettonTransfer} from './output/Root_JettonMinterSharded';
 import React from 'react';
 import {JettonWalletSharded} from './output/Root_JettonWalletSharded';
 import "dotenv/config"
 import {config} from './config/consts';
 import {Button} from './components/ui/button';
-// import { ExtendedShardedJettonWallet } from './contracts/ExtendedShardedJettonWallet';
-// import { TransferForm } from './components/TransferForm';
 
 function App() {
     const [tonConnectUI] = useTonConnectUI();
     const wallet = useTonWallet();
-    // const {connected, wallet, sender} = useTonConnect();
-    // React.useEffect(() => {
-    //   if (!wallet) {
-    //     tonConnectUI.openModal();
-    //   }
-    // }, [wallet, tonConnectUI]);
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
-
-    // Controlled inputs for better perf and mobile UX
     const [dest, setDest] = React.useState("");
     const [amountInput, setAmountInput] = React.useState("");
 
-    // Jetton decimals (set according to your contract, commonly 9)
-    // const jettonDecimals = 9;
-
     class TonConnectProvider implements Sender {
-        /**
-         * The TonConnect UI instance.
-         * @private
-         */
         private readonly provider: TonConnectUI;
-
-        /**
-         * The address of the current account.
-         */
         public get address(): Address | undefined {
             const address = this.provider.account?.address;
             return address ? Address.parse(address) : undefined;
         }
 
-        /**
-         * Creates a new TonConnectProvider.
-         * @param provider
-         */
         public constructor(provider: TonConnectUI) {
             this.provider = provider;
         }
 
-        /**
-         * Sends a message using the TonConnect UI.
-         * @param args
-         */
         public async send(args: SenderArguments): Promise<void> {
-            // The transaction is valid for 10 minutes.
             const validUntil = Math.floor(Date.now() / 1000) + 600;
-
-            // The recipient's address should be in bounceable format for all smart contracts.
             const address = args.to.toString({urlSafe: true, bounceable: true});
-
-            // The address of the sender, if available.
             // const from = this.address?.toRawString();
-
-            // The amount to send in nano tokens.
             const amount = args.value.toString();
-
-            // The state init cell for the contract.
             let stateInit: string | undefined;
             if (args.init) {
-                // State init cell for the contract.
                 const stateInitCell = beginCell()
                     .store(storeStateInit(args.init))
                     .endCell();
-                // Convert the state init cell to boc base64.
                 stateInit = stateInitCell.toBoc().toString("base64");
             }
 
-            // The payload for the message.
             let payload: string | undefined;
             if (args.body) {
-                // Convert the message body to boc base64.
                 payload = args.body.toBoc().toString("base64");
             }
 
-            // Use the TonConnect UI to send the message and wait for the sending
             await this.provider.sendTransaction({
                 validUntil: validUntil,
                 messages: [
@@ -107,60 +70,12 @@ function App() {
     const client = new TonClient({
         endpoint: "https://testnet.toncenter.com/api/v2/jsonRPC",
         apiKey: process.env.TONCENTER_TESTNET_KEY
-    }); // NOTE: how's this safe in a static site
+    });
     const sender = new TonConnectProvider(tonConnectUI);
     const userAddress = sender.address;
     const minterAddress = Address.parse(config.MINTER_ADDRESS);
     const minter = client.open(JettonMinterSharded.fromAddress(minterAddress));
-    // const contract = ExtendedShardedJettonWallet.fromInit(userAddress!, minterAddress, 0n);
-    // const jettonAddress = contractAddress();
-
-    // const getRootInstance = async () => {
-    //   // return client.open(ExtendedShardedJettonMinter.fromAddress(rootAddress));
-    //   // return client.open(JettonMinterSharded.fromAddress(minterAddress));
-
-    //   // const network = getNetworkFromEnv()
-    //   // const endpoint = await getHttpEndpoint({ network })
-    //   // const client = new TonClient({ endpoint: endpoint })
-
-    //   // const jettonAddress = await minter.getGetWalletAddress(userAddress);
-    //   // const jetton = client.open(JettonWalletSharded.fromAddress(jettonAddress));
-    //   // const jettonContract = await JettonWalletSharded.fromInit(userAddress, minterAddress, 0n);
-    //   // const jetton = client.open(jettonContract);
-    //   //======================================================================================
-    //   const jetton = client.open(await JettonWalletSharded.fromInit(userAddress, minterAddress, 0n));
-    //   const walletAllData = await jetton.getState();
-    //   console.log(walletAllData.balance)
-
-    //   // =============================================================================
-    //   // const api = await createApi("testnet");
-    //   // const provider = new TonConnectUI(); // OR you can use tonConnectUI as a provider from @tonconnect/ui-react
-
-    //   // // https://github.com/ton-community/assets-sdk/blob/main/examples/use-tonconnect.ts
-    //   // const sender = new TonConnectSender(provider);
-    //   // // const sender = new TonConnectSender(provider);
-
-    //   // const storage: PinataStorageParams = {
-    //   //   pinataApiKey: process.env.PINATA_API_KEY!,
-    //   //   pinataSecretKey: process.env.PINATA_SECRET!,
-    //   // };
-
-    //   // const sdk = AssetsSDK.create({
-    //   //   api,
-    //   //   storage,
-    //   //   sender,
-    //   // });
-
-    //   // const jetton = sdk.openJettonWallet(address);
-    //   // const RECEIVER_ADDRESS = Address.parse("RECEIVER_ADDRESS");
-
-    //   // jetton.send(sender, RECEIVER_ADDRESS, toNano(10));
-    // };
-
     const jetton = async () => {
-        // if (!wallet) setError("connect wallet and retry");//throw new Error("Wallet not connected");
-        // you can use createApi from @ton-community/assets-sdk
-        // const client = await createApi("testnet");
         const jettonAddress = await minter.getGetWalletAddress(userAddress!);
         return client.open(JettonWalletSharded.fromAddress(jettonAddress));
         // return client.open(await JettonWalletSharded.fromInit(userAddress!, minterAddress, 0n));
@@ -171,16 +86,22 @@ function App() {
             setIsLoading(true);
             setError(null);
             const walletInstance = await jetton();
-
-            // Convert input to nano jetton amount
+            // const deployerWallet = WalletContractV4.create({
+            //     workchain: 0,
+            //     publicKey: wallet!.account.publicKey,
+            // })
+            // const deployerWalletContract = client.open(deployerWallet)
+            // const queryId = await deployerWalletContract.getSeqno();
             const parsed = parseFloat(amountRaw.trim());
             if (isNaN(parsed) || parsed <= 0) {
                 setError("Amount must be a positive number");
                 setIsLoading(false);
                 return;
             }
-            // const amount = BigInt(Math.floor(parsed * Math.pow(10, jettonDecimals)));
+            // const amount = BigInt(Math.floor(parsed * Math.pow(10, 9)));
             const amount = toNano(parsed);
+            // const amount = fromNano(parsed);
+
 
             if (amount <= 0n) {
                 setError("Amount too small (underflow)");
@@ -190,13 +111,14 @@ function App() {
 
             const msg: JettonTransfer = {
                 $$type: "JettonTransfer",
+                // queryId: BigInt(queryId),
                 queryId: 0n,
                 amount: amount,
                 destination: to,
-                responseDestination: null,
+                responseDestination: userAddress!,
                 customPayload: null,
-                forwardTonAmount: 0n,
-                forwardPayload: beginCell().endCell().asSlice()
+                forwardTonAmount: 10000000n,
+                forwardPayload: beginCell().storeUint(0, 1).asSlice()
             };
 
             await walletInstance.send(sender, {value: toNano(1)}, msg);

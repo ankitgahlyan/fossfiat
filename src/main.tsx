@@ -37,3 +37,13 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   </StrictMode>
 )
 
+// Register Service Worker in production
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    const swUrl = `${import.meta.env.BASE_URL}service-worker.js`;
+    navigator.serviceWorker
+      .register(swUrl)
+      .catch((err) => console.error('SW registration failed:', err));
+  });
+}
+

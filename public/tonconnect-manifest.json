@@ -1,5 +1,23 @@
 {
   "url": "https://ankitgahlyan.github.io/fossfiat",
   "name": "FossFiat",
-  "iconUrl": "https://ankitgahlyan.github.io/fossfiat/vite.svg"
+  "iconUrl": "https://ankitgahlyan.github.io/fossfiat/tiger.svg",
+  "short_name": "FF",
+  "description": "A TON Jetton transfer app.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#1e293b",
+  "icons": [
+    {
+      "src": "tiger.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "tiger.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
 }
