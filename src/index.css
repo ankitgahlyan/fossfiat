@@ -1,9 +1,4 @@
-@tailwind utilities;
-@plugin "tailwindcss-animate";
-
 @import "tailwindcss";
-/* @import "tailwind/preflight"; */
-/* @import "tw-animate-css"; */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -83,7 +78,7 @@
 }
 
 .Hint {
-  color: var(--tg-theme-hint-color);
+    color: var(--tg-theme-button-color);
 }
 
 .Card {

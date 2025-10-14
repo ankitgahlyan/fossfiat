@@ -5,7 +5,7 @@ import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
-import { TonConnectUIProvider } from '@tonconnect/ui-react';
+import { TonConnectUIProvider, THEME } from '@tonconnect/ui-react';
 import WebApp from '@twa-dev/sdk';
 
 WebApp.ready();
@@ -14,7 +14,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>
     <TonConnectUIProvider
       manifestUrl={config.MANIFEST_URL}
-      //uiPreferences={{ theme: THEME.DARK }}
+      uiPreferences={{ theme: THEME.DARK }}
       actionsConfiguration={{
         twaReturnUrl: 'https://t.me/fossfiatbot/myapp'
       }}
