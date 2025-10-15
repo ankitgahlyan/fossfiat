@@ -14,6 +14,7 @@ import React from 'react';
 import {JettonWalletSharded} from './output/Root_JettonWalletSharded';
 import "dotenv/config"
 import {config} from './config/consts';
+import QRScanner from "@/components/QrScanner.tsx";
 import {Button} from './components/ui/button';
 
 function App() {
@@ -130,22 +131,22 @@ function App() {
         }
     };
 
-    const getRootState = async () => {
-        const state = await minter.getGetJettonData()
-        console.log("root state", state.totalSupply);
-        return state.totalSupply
-    };
-
-    const getState = async () => {
-        if (!wallet) {
-            await tonConnectUI.openSingleWalletModal('tonkeeper');
-            setError("Wallet not connected");
-            return;
-        }
-        const walletInstance = await jetton();
-        const walletState = walletInstance.getOtherConsts;
-        console.log("wallet state", walletState);
-    };
+    // const getRootState = async () => {
+    //     const state = await minter.getGetJettonData()
+    //     console.log("root state", state.totalSupply);
+    //     return state.totalSupply
+    // };
+    //
+    // const getState = async () => {
+    //     if (!wallet) {
+    //         await tonConnectUI.openSingleWalletModal('tonkeeper');
+    //         setError("Wallet not connected");
+    //         return;
+    //     }
+    //     const walletInstance = await jetton();
+    //     const walletState = walletInstance.getOtherConsts;
+    //     console.log("wallet state", walletState);
+    // };
 
     return (
         <main className="bg-black min-h-screen flex flex-col p-2">
@@ -163,6 +164,8 @@ function App() {
                     <div className="text-sm font-medium mb-2">Transfer Amount</div>
 
                     <label className="block text-xs text-neutral-300 mb-1" htmlFor="dest">Destination</label>
+
+                    <Button onClick={<QRScanner}>Scan Address</Button>
                     <input
                         id="dest"
                         name="destination"
@@ -214,28 +217,28 @@ function App() {
                             {isLoading ? "Sending…" : "Send"}
                         </button>
 
-                        <button
-                            type="button"
-                            onClick={getState}
-                            className="w-full sm:w-28 text-sm p-3 rounded-md bg-neutral-800 border border-neutral-700 text-neutral-200 hover:bg-neutral-700"
-                        >
-                            ACCOUNT STATE
-                        </button>
+                        {/*<button*/}
+                        {/*    type="button"*/}
+                        {/*    onClick={getState}*/}
+                        {/*    className="w-full sm:w-28 text-sm p-3 rounded-md bg-neutral-800 border border-neutral-700 text-neutral-200 hover:bg-neutral-700"*/}
+                        {/*>*/}
+                        {/*    ACCOUNT STATE*/}
+                        {/*</button>*/}
 
-                        <button
-                            type="button"
-                            onClick={getRootState}
-                            className="w-full sm:w-28 text-sm p-3 rounded-md bg-neutral-800 border border-neutral-700 text-neutral-200 hover:bg-neutral-700"
-                        >
-                            Root State
-                        </button>
+                        {/*<button*/}
+                        {/*    type="button"*/}
+                        {/*    onClick={getRootState}*/}
+                        {/*    className="w-full sm:w-28 text-sm p-3 rounded-md bg-neutral-800 border border-neutral-700 text-neutral-200 hover:bg-neutral-700"*/}
+                        {/*>*/}
+                        {/*    Root State*/}
+                        {/*</button>*/}
 
-                        <div className="w-full sm:w-auto flex items-center justify-center">
-                            <Button onClick={() => tonConnectUI.openSingleWalletModal('mytonwallet')}
-                                    className="w-full sm:w-auto p-3">
-                                Connect MyTonWallet
-                            </Button>
-                        </div>
+                        {/*<div className="w-full sm:w-auto flex items-center justify-center">*/}
+                        {/*    <Button onClick={() => tonConnectUI.openSingleWalletModal('mytonwallet')}*/}
+                        {/*            className="w-full sm:w-auto p-3">*/}
+                        {/*        Connect MyTonWallet*/}
+                        {/*    </Button>*/}
+                        {/*</div>*/}
                     </div>
                 </section>
 
