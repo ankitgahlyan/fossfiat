@@ -14,8 +14,7 @@ import React from 'react';
 import {JettonWalletSharded} from './output/Root_JettonWalletSharded';
 import "dotenv/config"
 import {config} from './config/consts';
-import QRScanner from "@/components/QrScanner.tsx";
-import {Button} from './components/ui/button';
+import AddressInput from '@/components/AddressInput';
 
 function App() {
     const [tonConnectUI] = useTonConnectUI();
@@ -165,7 +164,7 @@ function App() {
 
                     <label className="block text-xs text-neutral-300 mb-1" htmlFor="dest">Destination</label>
 
-                    <Button onClick={<QRScanner}>Scan Address</Button>
+                    <AddressInput/>
                     <input
                         id="dest"
                         name="destination"
